@@ -410,8 +410,8 @@
   // Split one series into a "profit" part (>= 0, green) and a "loss" part (<= 0, red);
   // the colour switches exactly at the zero crossing (linear interpolation).
   function splitSeries(ms, ys) {
-    var px = [], py = [], nx = [], ny = [], hx = [], hy = ys.slice();
-    for (var i = 0; i < ms.length; i++) {
+    var px = [], py = [], nx = [], ny = [], hx = [], hy = ys.slice(), i;
+    for (i = 0; i < ms.length; i++) {
       var y = ys[i], x = localISO(ms[i]);
       if (i > 0) {
         var y0 = ys[i - 1];
@@ -420,7 +420,11 @@
           px.push(xc); py.push(0); nx.push(xc); ny.push(0);
         }
       }
-      px.push(x); py.push(y >= 0 ? y : null); nx.push(x); ny.push(y <= 0 ? y : null); hx.push(x);
+      // exact zeros belong to the green (profit) trace; they only join the red trace next to a real loss
+      var negNeighbour = (ys[i - 1] < 0) || (ys[i + 1] < 0);
+      px.push(x); py.push(y >= 0 ? y : null);
+      nx.push(x); ny.push(y < 0 || (y === 0 && negNeighbour) ? y : null);
+      hx.push(x);
     }
     return { px: px, py: py, nx: nx, ny: ny, hx: hx, hy: hy };
   }
@@ -436,8 +440,15 @@
   }
   function drawPlotly(el, ms, ys, last, col, u) {
     var sp = splitSeries(ms, ys), unit = u.usd ? ' $' : ' SOL', dec = u.usd ? 2 : 3;
+    var span = Math.max.apply(null, ys.map(Math.abs)), flat = span < (u.usd ? 0.005 : 0.00005);
+    var posLine = flat ? '#6b7788' : '#00f5a0', posFill = flat ? 'rgba(107,119,136,0.10)' : 'rgba(0,245,160,0.15)';
+    if (flat) col = '#6b7788';
+    var yr = flat ? (u.usd ? [-5, 5] : [-0.05, 0.05]) : undefined;                // sensible axis for an unchanged account
+    var yfmt = u.usd ? (span <= 10 ? ',.1f' : ',.0f') : (span <= 0.2 ? ',.3f' : ',.2f');
+    var tspan = ms[ms.length - 1] - ms[0];
+    var xfmt = (S.range === '7d' || S.range === 'all') && tspan > 86400000 ? '%d.%m.' : (tspan < 600000 ? '%H:%M:%S' : '%H:%M');
     var traces = [
-      { x: sp.px, y: sp.py, type: 'scatter', mode: 'lines', line: { color: '#00f5a0', width: 2.4, shape: 'spline', smoothing: 0.4 }, fill: 'tozeroy', fillcolor: 'rgba(0,245,160,0.15)', hoverinfo: 'skip', connectgaps: false },
+      { x: sp.px, y: sp.py, type: 'scatter', mode: 'lines', line: { color: posLine, width: 2.4, shape: 'spline', smoothing: 0.4 }, fill: 'tozeroy', fillcolor: posFill, hoverinfo: 'skip', connectgaps: false },
       { x: sp.nx, y: sp.ny, type: 'scatter', mode: 'lines', line: { color: '#ff3b5c', width: 2.4, shape: 'spline', smoothing: 0.4 }, fill: 'tozeroy', fillcolor: 'rgba(255,59,92,0.15)', hoverinfo: 'skip', connectgaps: false },
       { x: sp.hx, y: sp.hy, type: 'scatter', mode: 'lines', line: { color: 'rgba(0,0,0,0)', width: 12 }, hovertemplate: '%{x|%d.%m. %H:%M:%S}<br><b>%{y:+,.' + dec + 'f}' + unit + '</b><extra></extra>' },
       { x: [sp.hx[sp.hx.length - 1]], y: [last], type: 'scatter', mode: 'markers', marker: { size: 16, color: col, opacity: 0.22 }, hoverinfo: 'skip', cliponaxis: false },
@@ -445,8 +456,8 @@
     ];
     var layout = {
       margin: { l: 4, r: 52, t: 8, b: 24 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', showlegend: false, dragmode: false, hovermode: 'x',
-      xaxis: { type: 'date', showgrid: false, zeroline: false, showline: false, fixedrange: true, nticks: 4, tickfont: { color: '#566072', size: 10 }, tickformat: S.range === '7d' || S.range === 'all' ? '%d.%m.' : '%H:%M', spikemode: 'across', spikecolor: '#6b7788', spikethickness: -2, spikedash: 'dot', spikesnap: 'data' },
-      yaxis: { side: 'right', showgrid: true, gridcolor: 'rgba(255,255,255,0.045)', zeroline: true, zerolinecolor: 'rgba(255,255,255,0.22)', zerolinewidth: 1, fixedrange: true, nticks: 5, tickfont: { color: '#566072', size: 10 }, tickformat: u.usd ? ',.0f' : ',.2f', automargin: true },
+      xaxis: { type: 'date', showgrid: false, zeroline: false, showline: false, fixedrange: true, nticks: 4, tickfont: { color: '#566072', size: 10 }, tickformat: xfmt, spikemode: 'across', spikecolor: '#6b7788', spikethickness: -2, spikedash: 'dot', spikesnap: 'data' },
+      yaxis: { side: 'right', showgrid: true, gridcolor: 'rgba(255,255,255,0.045)', zeroline: true, zerolinecolor: 'rgba(255,255,255,0.22)', zerolinewidth: 1, fixedrange: true, nticks: 5, tickfont: { color: '#566072', size: 10 }, tickformat: yfmt, automargin: true, range: yr },
       hoverlabel: { bgcolor: '#0e1117', bordercolor: 'rgba(255,255,255,0.18)', font: { color: '#eef2f7', size: 12 } }
     };
     var cfg = { displayModeBar: false, responsive: true, scrollZoom: false, doubleClick: false };
