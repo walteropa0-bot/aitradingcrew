@@ -20,7 +20,7 @@ pip install -r requirements.txt
 python main.py                 # Dashboard auf http://localhost:8000
 python selftest.py             # prüft alle externen Dienste (nur lesend)
 USE_SIMULATED_MARKET=1 python main.py   # künstlicher Demo-Markt, funktioniert ohne Internet
-pip install -r requirements-dev.txt && pytest      # 140 Tests
+pip install -r requirements-dev.txt && pytest      # 143 Tests (2 optional gegen echtes Postgres)
 ```
 
 Der Schalter steht **ganz oben in [`config.py`](config.py)**: `PAPER_TRADING = True` (Demo) bzw. `False` (live).
@@ -100,7 +100,7 @@ crew/
   chain/             ← jupiter.py (Swap V2) · wallet.py (Schlüssel + Partial-Signing)
   trading/           ← executor.py (Paper/Live) · portfolio.py (Ledger) · store.py (Datei/Postgres)
   web/               ← app.py · auth.py · static/ (index.html, css, js, Icons)
-tests/               ← 140 Tests (Parser gegen echte API-Antworten, Fake-Jupiter/RPC, Engine-Läufe, Web/Auth)
+tests/               ← 143 Tests (Parser gegen echte API-Antworten, Fake-Jupiter/RPC, Engine-Läufe, Web/Auth)
 ```
 
 ## Was getestet ist – und was nicht (ehrlich)
