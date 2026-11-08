@@ -1,0 +1,13 @@
+entrypoint = "main.py"
+modules = ["python-3.11"]
+run = "pip install -q -r requirements.txt && python main.py"
+
+[deployment]
+# Reserved VM = läuft 24/7 (siehe ANLEITUNG_REPLIT.md). Autoscale wäre falsch: es schläft ein.
+deploymentTarget = "gce"
+build = ["sh", "-c", "pip install -q -r requirements.txt"]
+run = ["sh", "-c", "python main.py"]
+
+[[ports]]
+localPort = 8000
+externalPort = 80
