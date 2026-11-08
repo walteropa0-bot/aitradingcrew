@@ -1,0 +1,24 @@
+# Geheimnisse & lokale Daten – NIE ins Repository
+.env
+.env.*
+!.env.example
+data/
+*.bak
+state_*.json
+backtest/cache/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.pythonlibs/
+*.egg-info/
+
+# Replit / Editor
+.upm/
+.cache/
+.config/
+replit.nix
+.DS_Store

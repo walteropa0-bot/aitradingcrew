@@ -1,0 +1,27 @@
+# Render-Blueprint (Alternative zu Replit). Wichtig: Der Bot muss 24/7 laufen -> KEIN kostenloser Plan
+# (kostenlose Web-Dienste schlafen nach ca. 15 Minuten ein). Preise bitte direkt bei Render prüfen.
+services:
+  - type: web
+    name: trend-crew
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    healthCheckPath: /_stcore/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DATA_DIR
+        value: /var/data
+      - key: DASHBOARD_PASSWORD
+        sync: false              # im Render-Dashboard eintragen
+      - key: EXCHANGE_API_KEY
+        sync: false              # nur für den LIVE-Modus
+      - key: EXCHANGE_API_SECRET
+        sync: false              # nur für den LIVE-Modus
+      - key: LIVE_CAPITAL
+        sync: false              # nur für den LIVE-Modus
+    disk:
+      name: trendcrew-data
+      mountPath: /var/data
+      sizeGB: 1

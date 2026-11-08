@@ -1,0 +1,21 @@
+# Streamlit-Einstellungen (Aussehen + Server). main.py setzt dieselben Werte zusätzlich.
+[theme]
+base = "dark"
+primaryColor = "#00f5a0"
+backgroundColor = "#05060a"
+secondaryBackgroundColor = "#0d1017"
+textColor = "#eef1f6"
+font = "sans serif"
+
+[server]
+headless = true
+fileWatcherType = "none"
+runOnSave = false
+enableStaticServing = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = false
